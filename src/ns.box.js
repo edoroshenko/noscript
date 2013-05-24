@@ -54,13 +54,13 @@ ns.Box.prototype._getDescendants = function(descs) {
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 //  Ищем все новые блоки и блоки, требующие перерисовки.
-ns.Box.prototype._getRequestViews = function(updated, layout, params) {
+ns.Box.prototype.getRequestViews = function(updated, layout, params) {
     for (var id in layout) {
         //  Согласно новому layout'у здесь должен быть view с id/params.
         //  Создаем его (если он уже есть, он возьмется из this.views).
         var view = this._addView(id, params, layout[id].type);
         //  Идем вниз рекурсивно.
-        view._getRequestViews(updated, layout[id].views, params);
+        view.getRequestViews(updated, layout[id].views, params);
     }
 };
 
@@ -118,7 +118,7 @@ ns.Box.prototype._updateHTML = function(node, layout, params, options, events) {
         var key = ns.View.getKey(id, params);
         layoutActive[id] = key;
 
-        //  Достаем ранее созданный блок (в _getRequestViews).
+        //  Достаем ранее созданный блок (в getRequestViews).
         var view = views[key];
 
         //  Обновляем его.

@@ -40,8 +40,21 @@ ns.View.prototype._$document = $(document);
  */
 ns.View.prototype._$window = $(window);
 
+/**
+ * Создаёт нужные модели (или берем их из кэша, если они уже существуют)
+ */
+ns.View.prototype._createModels = function() {
+    var models = this.models = {};
+    for (var modelI = 0, l = this.info.models.length; modelI < l; modelI++) {
+        var model_id = this.info.models[modelI];
+        models[model_id] = ns.Model.create(model_id, this.params);
+    }
+};
+
 ns.View.prototype._init = function(id, params, async) {
     this.id = id;
+
+    console.log(this);
 
     this._onModelChangeBinded = this._onModelChange.bind(this);
 
@@ -56,13 +69,7 @@ ns.View.prototype._init = function(id, params, async) {
 
     no.extend(this, ns.View.getKeyAndParams(this.id, params || {}, this.info));
 
-    //  Создаем нужные модели (или берем их из кэша, если они уже существуют).
-    var model_ids = this.info.models;
-    var models = this.models = {};
-    for (var modelI = 0, l = model_ids.length; modelI < l; modelI++) {
-        var model_id = model_ids[modelI];
-        models[model_id] = ns.Model.create(model_id, this.params);
-    }
+    this._createModels();
 
     this.views = null;
     this.node = null;
@@ -649,6 +656,16 @@ ns.View.prototype._apply = function(callback) {
  * @param params
  * @return {*}
  */
+ns.View.prototype.getRequestViews = function(updated, pageLayout, params) {
+    this._getRequestViews(updated, pageLayout, params);
+
+    this._apply(function(view, id) {
+        view.getRequestViews(updated, pageLayout[id].views, params);
+    });
+
+    return updated;
+};
+
 ns.View.prototype._getRequestViews = function(updated, pageLayout, params) {
     /**
      * Флаг, означающий, что view грузится асинхронно.
@@ -683,12 +700,6 @@ ns.View.prototype._getRequestViews = function(updated, pageLayout, params) {
             this._addView(view_id, params, pageLayout[view_id].type);
         }
     }
-
-    this._apply(function(view, id) {
-        view._getRequestViews(updated, pageLayout[id].views, params);
-    });
-
-    return updated;
 };
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -754,6 +765,13 @@ ns.View.prototype._getViewTree = function(layout, params) {
         return true;
     }
 
+    tree = this._addDescendantViewTree(tree, layout, params);
+
+    return tree;
+};
+
+ns.View.prototype._addDescendantViewTree = function(tree, layout, params) {
+    console.log('ns.View.prototype._addDescendantViewTree', arguments);
     //  Собираем дерево рекурсивно из подблоков.
     this._apply(function(view, id) {
         tree.views[id] = view._getViewTree(layout[id].views, params);

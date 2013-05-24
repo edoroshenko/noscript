@@ -86,7 +86,7 @@ ns.Update.prototype.start = function(async) {
         return this.promise;
     }
 
-    var updated = this.view._getRequestViews({
+    var updated = this.view.getRequestViews({
         sync: [],
         async: []
     }, this.layout.views, this.params);
@@ -195,6 +195,8 @@ ns.Update.prototype._update = function(async) {
         'views': {}
     };
     this.view._getUpdateTree(tree, layout.views, params);
+
+    console.log('ns.Update.prototype._update tree:', tree);
 
     var node;
     // если пустое дерево, то ничего не реднерим,
