@@ -29,7 +29,6 @@ ns.ViewCollection.prototype._createModels = function() {
 
 	this.models = {};
 	this.models[model_id] = ns.Model.create(model_id, this.params);
-    console.log('ns.ViewCollection.prototype._createModels', this.models);
 };
 
 ns.ViewCollection.prototype._init = function() {
@@ -39,8 +38,6 @@ ns.ViewCollection.prototype._init = function() {
 		throw new Error("[ns.ViewCollection] '" + this.id + "' must have item view id defined");
 	}
 };
-
-// ns.ViewCollection.prototype._apply = function() {};
 
 ns.ViewCollection.prototype.getRequestViews = function(updated, pageLayout, params) {
 	this._getRequestViews(updated, pageLayout, params);
@@ -55,7 +52,11 @@ ns.ViewCollection.prototype._addDescendantViewTree = function(tree) {
             no.extend({}, this.params, model.params)
         );
 
-        tree.views[view.key] = view;
+        if (!tree.views[this.info.split.view_id]) {
+            tree.views[this.info.split.view_id] = [];
+        }
+
+        tree.views[this.info.split.view_id].push(view);
     }.bind(this));
 
     return tree;
@@ -67,10 +68,6 @@ ns.ViewCollection.prototype._getView = function(key) {
 };
 
 ns.ViewCollection.prototype._addView = function(id, params) {
-    if (!this.views) {
-        this.views = {};
-    }
-
     var key = ns.View.getKey(id, params);
 
     var view = this._getView(key);
@@ -79,11 +76,9 @@ ns.ViewCollection.prototype._addView = function(id, params) {
         this.views[view.key] = view;
     }
 
-    console.log('ns.ViewCollection.prototype._addView', view, this.views);
-
     return view;
 };
 
 // ns.ViewCollection.prototype._updateHTML = function(node, layout, params, options, events) {
-	
+
 // };

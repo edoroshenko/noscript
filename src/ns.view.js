@@ -54,8 +54,6 @@ ns.View.prototype._createModels = function() {
 ns.View.prototype._init = function(id, params, async) {
     this.id = id;
 
-    console.log(this);
-
     this._onModelChangeBinded = this._onModelChange.bind(this);
 
     /**
@@ -771,7 +769,6 @@ ns.View.prototype._getViewTree = function(layout, params) {
 };
 
 ns.View.prototype._addDescendantViewTree = function(tree, layout, params) {
-    console.log('ns.View.prototype._addDescendantViewTree', arguments);
     //  Собираем дерево рекурсивно из подблоков.
     this._apply(function(view, id) {
         tree.views[id] = view._getViewTree(layout[id].views, params);
