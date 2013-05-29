@@ -7,14 +7,22 @@ ns.ViewCollection.define = function(id, info) {
 };
 
 ns.ViewCollection.prototype._createModels = function() {
-	var model_id = this.info.models[0];
+    var models = this.models = {};
 
-	if (1 !== this.info.models.length || !model_id || !ns.Model.info(model_id).isCollection) {
-		throw new Error("[ns.ViewCollection] '" + this.id + "' must depend only on one model collection");
-	}
+    for (var modelI = 0, l = this.info.models.length; modelI < l; modelI++) {
+        var model_id = this.info.models[modelI];
 
-	this.models = {};
-	this.models[model_id] = ns.Model.create(model_id, this.params);
+        if (ns.Model.info(model_id).isCollection) {
+            // Пока можно подписывать viewCollection только на одну modelCollection
+            if (this.info.modelCollectionId && model_id !== this.info.modelCollectionId) {
+                throw new Error("[ns.ViewCollection] '" + this.id + "' must depend only on one model collection");
+            } else {
+                this.info.modelCollectionId = model_id;
+            }
+        }
+
+        models[model_id] = ns.Model.create(model_id, this.params);
+    }
 };
 
 ns.ViewCollection.prototype._init = function() {
@@ -47,7 +55,7 @@ ns.ViewCollection.prototype._getDescendantViewsTree = function(layout, params) {
     };
 
     // Для каждого элемента модели-коллекции
-    $.each(this.models[this.info.models[0]].models, function(i, model) {
+    $.each(this.models[this.info.modelCollectionId].models, function(i, model) {
         // создадим собственный view
         var view = this._addView(
             this.info.split.view_id,
