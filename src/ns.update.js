@@ -196,8 +196,6 @@ ns.Update.prototype._update = function(async) {
     };
     this.view._getUpdateTree(tree, layout.views, params);
 
-    console.log('ns.Update.prototype._update tree:', tree);
-
     var node;
     // если пустое дерево, то ничего не реднерим,
     // но кидаем события и скрываем/открываем блоки

@@ -1,17 +1,3 @@
-ns.ViewItem = function() {};
-
-no.inherit(ns.ViewItem, ns.View);
-
-ns.ViewItem.prototype._addDescendantViewTree = function(tree) {
-    return tree;
-};
-
-ns.ViewItem.define = function(id, info) {
-    return ns.View.define(id, info, this);
-};
-
-
-
 ns.ViewCollection = function() {};
 
 no.inherit(ns.ViewCollection, ns.View);
@@ -44,23 +30,40 @@ ns.ViewCollection.prototype.getRequestViews = function(updated, pageLayout, para
     return updated;
 };
 
-ns.ViewCollection.prototype._addDescendantViewTree = function(tree) {
+ns.ViewCollection.prototype._getUpdateTree = function(tree, layout, params) {
+    // Добавим в layout представление массива элементов ViewCollection
+    if (!layout[this.info.split.view_id]) {
+        layout[this.info.split.view_id] = {
+            views: {}
+        };
+    }
+
+    return ns.View.prototype._getUpdateTree.apply(this, arguments);
+};
+
+ns.ViewCollection.prototype._getDescendantViewsTree = function(layout, params) {
+    var tree = {
+        views: {}
+    };
+
+    // Для каждого элемента модели-коллекции
     $.each(this.models[this.info.models[0]].models, function(i, model) {
-        // Для каждого элемента модели-коллекции создадим собственный view
+        // создадим собственный view
         var view = this._addView(
             this.info.split.view_id,
             no.extend({}, this.params, model.params)
         );
 
+        // Если нет, создадим веточку в дереве
         if (!tree.views[this.info.split.view_id]) {
             tree.views[this.info.split.view_id] = [];
         }
 
-        tree.views[this.info.split.view_id].push(view);
+        // Добавим в дерево декларацию вида
+        tree.views[this.info.split.view_id].push(view._getViewTree(layout, params));
     }.bind(this));
 
     return tree;
-    // return ns.View.prototype._addDescendantViewTree.apply(this, arguments);
 };
 
 ns.ViewCollection.prototype._getView = function(key) {
@@ -79,6 +82,11 @@ ns.ViewCollection.prototype._addView = function(id, params) {
     return view;
 };
 
-// ns.ViewCollection.prototype._updateHTML = function(node, layout, params, options, events) {
-
-// };
+ns.ViewCollection.prototype._apply = function(callback) {
+    var views = this.views;
+    for (var id in views) {
+        for (var i = 0; i < views[id].length; i++) {
+            callback(views[id][i], id);
+        }
+    }
+};

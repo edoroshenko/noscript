@@ -24,11 +24,11 @@ match .* ns-view {
 }
 
 // Главная мода для каждой view
-// Генерит <div class="ns-view-<viewname>"> ... </div>
+// Генерит <div class="ns-view-<viewname>" data-key="<key>"> ... </div>
 // Содержимое view определяется модой ns-view-content
 // @private
 match .* ns-build-view {
-    <div class="ns-view-{ name() }">
+    <div class="ns-view-{ name() }" data-key="{ /.key }">
         @class += apply . ns-view-add-class
         if /.async {
             apply . ns-view-async-content
