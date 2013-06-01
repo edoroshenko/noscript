@@ -3,7 +3,7 @@ ns.ViewCollection = function() {};
 no.inherit(ns.ViewCollection, ns.View);
 
 ns.ViewCollection.define = function(id, info) {
-	return ns.View.define(id, info, this);
+    return ns.View.define(id, info, this);
 };
 
 ns.ViewCollection.prototype._createModels = function() {
@@ -26,15 +26,15 @@ ns.ViewCollection.prototype._createModels = function() {
 };
 
 ns.ViewCollection.prototype._init = function() {
-	ns.View.prototype._init.apply(this, arguments);
+    ns.View.prototype._init.apply(this, arguments);
 
-	if (!this.info.split || !this.info.split.view_id) {
-		throw new Error("[ns.ViewCollection] '" + this.id + "' must have item view id defined");
-	}
+    if (!this.info.split || !this.info.split.view_id) {
+        throw new Error("[ns.ViewCollection] '" + this.id + "' must have item view id defined");
+    }
 };
 
 ns.ViewCollection.prototype.getRequestViews = function(updated, pageLayout, params) {
-	this._getRequestViews(updated, pageLayout, params);
+    this._getRequestViews(updated, pageLayout, params);
     return updated;
 };
 
@@ -90,11 +90,9 @@ ns.ViewCollection.prototype._addView = function(id, params) {
     return view;
 };
 
-ns.ViewCollection.prototype._apply = function(callback) {
+ns.ViewCollection.prototype._apply = function(callback, arg) {
     var views = this.views;
-    for (var id in views) {
-        for (var i = 0; i < views[id].length; i++) {
-            callback(views[id][i], id);
-        }
+    for (var key in views) {
+        callback(views[key], views[key].id);
     }
 };
