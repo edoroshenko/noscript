@@ -156,6 +156,19 @@ describe('ns.ViewCollection', function() {
                 }
             });
 
+            ns.Model.define('m-collection-2', {
+                params: {
+                    id: null
+                },
+                split: {
+                    model_id: 'm-collection-2',
+                    items: '.data',
+                    params: {
+                        id: '.id'
+                    }
+                }
+            });
+
             // define views
             ns.View.define('app');
             ns.ViewCollection.define('v-collection', {
@@ -168,10 +181,32 @@ describe('ns.ViewCollection', function() {
                 models: [ 'm-collection-item' ]
             });
 
+            // recursive view
+            ns.ViewCollection.define('v-collection-2', {
+                models: [ 'm-collection-2' ],
+                split: {
+                    view_id: 'v-collection-2'
+                },
+                events: {
+                    'ns-view-init': 'oninit'
+                },
+                methods: {
+                    oninit: function() {
+                        this.views || (this.views = {});
+                    }
+                }
+            });
+
             // define layout
             ns.layout.define('app', {
                 'app': {
                     'v-collection': {}
+                }
+            });
+
+            ns.layout.define('app-2', {
+                'app': {
+                    'v-collection-2': {}
                 }
             });
 
@@ -289,6 +324,95 @@ describe('ns.ViewCollection', function() {
 
                 expect(node1new).to.be(this.nodeItem1Old);
                 expect(node2new).to.be(this.nodeItem2Old);
+            });
+
+        });
+
+        describe('update of recursive view collections', function() {
+
+            beforeEach(function(finish) {
+                this.model = ns.Model.create('m-collection-2', {id: '0'}, {
+                    data: [{
+                        data: [{
+                            data: [],
+                            title: '1.1',
+                            id: '1.1'
+                        }],
+                        title: '1',
+                        id: '1'
+                    }, {
+                        data: [{
+                            data: [],
+                            title: '2.1',
+                            id: '2.1'
+                        }],
+                        title: '2',
+                        id: '2'
+                    }],
+                    title: '0'
+                });
+
+                this.APP = ns.View.create('app');
+
+                // first rewdraw
+                var layout = ns.layout.page('app-2');
+                new ns.Update(this.APP, layout, {id: '0'})
+                    .start()
+                    .done(function() {
+                        this.collectionViewNode = this.APP.node.getElementsByClassName('ns-view-v-collection-2')[0];
+
+                        // Load subcollection data.
+                        ns.Model.get('m-collection-2', {id: '1.1'}).setData({
+                            data: [
+                                {
+                                    data: [{
+                                        data: [],
+                                        title: '1.1.1.1',
+                                        id: '1.1.1.1'
+                                    }],
+                                    title: '1.1.1',
+                                    id: '1.1.1'
+                                },
+                                {
+                                    data: [],
+                                    title: '1.1.2',
+                                    id: '1.1.2'
+                                }
+                            ],
+                            title: '1.1',
+                            id: '1.1'
+                        });
+
+                        // start update to redraw views
+                        var layout = ns.layout.page('app-2');
+                        new ns.Update(this.APP, layout, {id: '0'})
+                            .start()
+                            .done(function() {
+                                // Skip this update loop.
+
+                                var layout = ns.layout.page('app-2');
+                                new ns.Update(this.APP, layout, {id: '0'})
+                                    .start()
+                                    .done(function() {
+                                        // Edit subcollection later on.
+                                        ns.Model.get('m-collection-2', {id: '1.1.1'}).set('.title', '1.1-edit');
+
+                                        var layout = ns.layout.page('app-2');
+                                        new ns.Update(this.APP, layout, {id: '0'})
+                                            .start()
+                                            .done(function() {
+                                                finish();
+                                            });
+                                    }.bind(this));
+                            }.bind(this));
+                    }.bind(this));
+            });
+
+            it('should correctly update nested nodes', function() {
+                expect(this.collectionViewNode.childNodes).to.have.length(2);
+                expect(this.collectionViewNode.firstChild.childNodes).to.have.length(1);
+                expect(this.collectionViewNode.firstChild.firstChild.childNodes).to.have.length(2);
+                expect(this.collectionViewNode.lastChild.childNodes).to.have.length(1);
             });
 
         });
