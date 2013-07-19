@@ -376,7 +376,7 @@ ns.ViewCollection.prototype._updateHTML = function(node, layout, params, updateO
             var view = this._getView(this.info.split.view_id, p);
 
             // Здесь возможны следующие ситуации:
-            if (isOuterPlaceholder) {
+            if (this.isValidSelf()) {
                 // 1. html внешнего вида не менялся. Это значит, что вместо корневого html
                 // нам пришёл placeholder, содержащий в себе те вложенные виды, которые нужно
                 // перерендерить. Поэтому если
@@ -395,22 +395,8 @@ ns.ViewCollection.prototype._updateHTML = function(node, layout, params, updateO
                         // Либо в самом начале, если предыдущего нет (т.е. это первый)
                         $(containerDesc).prepend(view.node);
                     }
-                }
-            } else {
-                // 2. html внешнего вида только что изменился. Это значит, что он вставится в dom
-                //    вместе с внутренними видами. Для невалидных там будет новый html, а для
-                //    валидных там будет placeholder. Поэтому если
-                //      1.1 view не валиден, то он уже занял правильное место в корневом html.
-                //          Делаем _updateHtml
-                //      1.2 view валиден, то заменим placeholder на правильный html.
-                if (!view.isValid()) {
-                   view._updateHTML(newNode, null, params, updateOptions, events);
-                } else {
-                    // здесь не нужно перевешивать события, т.к. они могут быть повешены
-                    // либо непосредственно на ноду, либо на document. В первом случае
-                    // события переедут вместе со старой нодой, а во втором останутся там,
-                    // где и были раньше
-                    ns.replaceNode(view._extractNode(newNode), view.node);
+                } else if (!isOuterPlaceholder) {
+                    ns.replaceNode(view._extractNode(this.node), view.node);
                 }
             }
 
