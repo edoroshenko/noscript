@@ -333,19 +333,11 @@ describe('ns.ViewCollection', function() {
             beforeEach(function(finish) {
                 this.model = ns.Model.create('m-collection-2', {id: '0'}, {
                     data: [{
-                        data: [{
-                            data: [],
-                            title: '1.1',
-                            id: '1.1'
-                        }],
+                        data: [],
                         title: '1',
                         id: '1'
                     }, {
-                        data: [{
-                            data: [],
-                            title: '2.1',
-                            id: '2.1'
-                        }],
+                        data: [],
                         title: '2',
                         id: '2'
                     }],
@@ -362,25 +354,25 @@ describe('ns.ViewCollection', function() {
                         this.collectionViewNode = this.APP.node.getElementsByClassName('ns-view-v-collection-2')[0];
 
                         // Load subcollection data.
-                        ns.Model.get('m-collection-2', {id: '1.1'}).setData({
+                        ns.Model.get('m-collection-2', {id: '1'}).setData({
                             data: [
                                 {
                                     data: [{
                                         data: [],
-                                        title: '1.1.1.1',
-                                        id: '1.1.1.1'
+                                        title: '1.1.1',
+                                        id: '1.1.1'
                                     }],
-                                    title: '1.1.1',
-                                    id: '1.1.1'
+                                    title: '1.1',
+                                    id: '1.1'
                                 },
                                 {
                                     data: [],
-                                    title: '1.1.2',
-                                    id: '1.1.2'
+                                    title: '1.2',
+                                    id: '1.2'
                                 }
                             ],
-                            title: '1.1',
-                            id: '1.1'
+                            title: '1',
+                            id: '1'
                         });
 
                         // start update to redraw views
@@ -395,7 +387,7 @@ describe('ns.ViewCollection', function() {
                                     .start()
                                     .done(function() {
                                         // Edit subcollection later on.
-                                        ns.Model.get('m-collection-2', {id: '1.1.1'}).set('.title', '1.1-edit');
+                                        ns.Model.get('m-collection-2', {id: '1'}).set('.title', '1-edit');
 
                                         var layout = ns.layout.page('app-2');
                                         new ns.Update(this.APP, layout, {id: '0'})
@@ -410,9 +402,9 @@ describe('ns.ViewCollection', function() {
 
             it('should correctly update nested nodes', function() {
                 expect(this.collectionViewNode.childNodes).to.have.length(2);
-                expect(this.collectionViewNode.firstChild.childNodes).to.have.length(1);
-                expect(this.collectionViewNode.firstChild.firstChild.childNodes).to.have.length(2);
-                expect(this.collectionViewNode.lastChild.childNodes).to.have.length(1);
+                expect(this.collectionViewNode.firstChild.childNodes).to.have.length(2);
+                expect(this.collectionViewNode.firstChild.firstChild.childNodes).to.have.length(1);
+                expect(this.collectionViewNode.lastChild.childNodes).to.have.length(0);
             });
 
         });
