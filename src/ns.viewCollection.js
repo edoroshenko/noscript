@@ -375,8 +375,10 @@ ns.ViewCollection.prototype._updateHTML = function(node, layout, params, updateO
             // view для этой модели уже точно есть, т.к. мы его создали в _getUpdateTree.
             var view = this._getView(this.info.split.view_id, p);
 
-            // Здесь возможны следующие ситуации:
             if (this.isValidSelf()) {
+                // Узел, представляющий подвид во вставленном дереве.
+                var viewNodeCurrent = view._extractNode(this.node);
+
                 // 1. html внешнего вида не менялся. Это значит, что вместо корневого html
                 // нам пришёл placeholder, содержащий в себе те вложенные виды, которые нужно
                 // перерендерить. Поэтому если
@@ -395,8 +397,9 @@ ns.ViewCollection.prototype._updateHTML = function(node, layout, params, updateO
                         // Либо в самом начале, если предыдущего нет (т.е. это первый)
                         $(containerDesc).prepend(view.node);
                     }
-                } else if (!isOuterPlaceholder) {
-                    ns.replaceNode(view._extractNode(this.node), view.node);
+                // TODO: Может вынести проверку на плейсхолдер в хелпер-метод?
+                } else if ($(viewNodeCurrent).hasClass('ns-view-placeholder')) {
+                    ns.replaceNode(viewNodeCurrent, view.node);
                 }
             }
 
